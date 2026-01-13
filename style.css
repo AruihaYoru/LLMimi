@@ -1,0 +1,182 @@
+/* --- Global Reset --- */
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-color: #0f0f0f;
+    --panel-bg: #181818;
+    --input-bg: #000000;
+    --text-color: #e0e0e0;
+    --accent-color: #00ffcc;
+    --accent-hover: #00ccaa;
+    --error-color: #ff4444;
+    --border-color: #2a2a2a;
+    --font-mono: 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* --- Top Header / Controls --- */
+h1 {
+    font-size: 1.2rem;
+    margin: 10px 20px;
+    font-weight: 300;
+    color: var(--accent-color);
+}
+
+.controls {
+    background: var(--panel-bg);
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+button {
+    background-color: var(--accent-color);
+    color: #000;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 3px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+button:hover { background-color: var(--accent-hover); }
+button#stopBtn { background-color: var(--error-color); color: white; }
+
+/* --- Editor Layout --- */
+.editor-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 0;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.main-sequence, .tracks-list {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+    height: 100%;
+}
+
+h3 {
+    font-size: 0.9rem;
+    padding: 10px 15px;
+    margin: 0;
+    background: #111;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* --- Textarea Custom --- */
+textarea {
+    background-color: var(--input-bg);
+    color: #9cdcf0;
+    border: none;
+    padding: 15px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.5;
+    resize: none;
+    width: 100%;
+    outline: none;
+}
+
+.main-sequence textarea {
+    height: 100%;
+}
+
+/* --- Tracks Container --- */
+#tracksContainer {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 15px;
+    background: #121212;
+}
+
+.track-container {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.track-header {
+    background: #252525;
+    padding: 5px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.track-container textarea {
+    height: 150px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* --- Output Area --- */
+.output-area {
+    height: 150px;
+    border-top: 2px solid var(--accent-color);
+    flex-shrink: 0;
+}
+
+#outputMimi {
+    height: 100%;
+    background: #050505;
+    color: #666;
+    font-size: 11px;
+}
+
+/* --- Scrollbar styling --- */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #444;
+}
+
+.remove-btn {
+    padding: 2px 8px;
+    font-size: 10px;
+    background: #442222;
+    color: #ff8888;
+    border: 1px solid #663333;
+}
+
+    
+input[type="text"]#titleInput {
+    background: #000;
+    color: var(--accent-color);
+    border: 1px solid var(--border-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+  

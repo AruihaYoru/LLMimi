@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>LLMimi - AI Music Assembly Studio</title>	
+	<link rel="stylesheet" href="style.css">
+    <style>
+        .track-container { border: 1px solid #ccc; margin: 10px 0; padding: 10px; }
+        textarea { width: 100%; font-family: monospace; }
+        .controls { margin: 20px 0; }
+        .editor-layout { display: flex; gap: 20px; }
+        .main-sequence { flex: 1; }
+        .tracks-list { flex: 1; }
+    </style>
+</head>
+<body>
+
+    <h1>LLMimi Studio</h1>
+	<div class="controls">
+		<button id="playBtn">Compile & Play</button>
+		<button id="stopBtn">Stop</button>
+		<button id="addTrackBtn">+ Add Track</button>
+		
+		<span>Title: <input type="text" id="titleInput" value="Untitled" style="width: 120px;"></span>
+		<span>FPS: <input type="number" id="fpsInput" value="24" style="width: 40px;"></span>
+		<span>BPM: <input type="number" id="bpmInput" value="120" style="width: 50px;"></span>
+	</div>
+
+    <div class="editor-layout">
+        <div class="main-sequence">
+            <h3>main.s (Main Loop)</h3>
+            <p><small>TrackID, Start, PitchOffset, Volume, Pan</small></p>
+            <textarea id="mainSeq" rows="20" placeholder="# Example:
+00, 0, 0, 255, 128
+00, 48, 2, 255, 128"></textarea>
+        </div>
+
+        <div class="tracks-list">
+            <h3>Tracks (.s containers)</h3>
+            <div id="tracksContainer">
+            </div>
+        </div>
+    </div>
+
+    <hr>
+    <h3>Output (.mimi)</h3>
+	<div class="output-area">
+        <textarea id="outputMimi" readonly></textarea>
+    </div>
+
+	<script src="https://cdn.jsdelivr.net/gh/AruihaYoru/mimi@main/mimi.min.js"></script>
+    <script src="compiler.js"></script>
+    <script src="main.js"></script>
+
+    <script>
+        const tracksContainer = document.getElementById('tracksContainer');
+        const addTrackBtn = document.getElementById('addTrackBtn');
+        const playBtn = document.getElementById('playBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        
+        let trackCount = 0;
+
+        function addTrack(id = null) {
+            const trackId = id !== null ? id : trackCount.toString().padStart(2, '0');
+            const div = document.createElement('div');
+            div.className = 'track-container';
+            div.innerHTML = `
+                <strong>Track ${trackId}.s</strong>
+                <textarea class="track-data" data-id="${trackId}" rows="8" placeholder="Type, Pitch, Length, Start, Vol, Pan"></textarea>
+                <button onclick="this.parentElement.remove()">Remove</button>
+            `;
+            tracksContainer.appendChild(div);
+            trackCount++;
+        }
+
+        addTrack('00');
+
+        addTrackBtn.onclick = () => addTrack();
+
+        const player = new MimiPlayer();
+        const compiler = new MimaCompiler();
+
+        playBtn.onclick = async () => {
+            const fps = parseInt(document.getElementById('fpsInput').value);
+            const mainS = document.getElementById('mainSeq').value;
+            
+            const tracks = {};
+            document.querySelectorAll('.track-data').forEach(ta => {
+                tracks[ta.dataset.id] = ta.value;
+            });
+
+            try {
+                const compiledMimi = compiler.compile(mainS, tracks, fps);
+                document.getElementById('outputMimi').value = compiledMimi;
+
+                player.fps = fps;
+                player.load(compiledMimi);
+                player.play();
+            } catch (e) {
+                alert("Compile Error: " + e.message);
+                console.error(e);
+            }
+        };
+
+        stopBtn.onclick = () => player.stop();
+
+    </script>
+</body>
+</html>
