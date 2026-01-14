@@ -54,14 +54,17 @@ class MimaCompiler {
         result += `# Format: Type, Pitch, Length, Start, Volume, Pan\n\n`;
 
         const lines = mainText.split('\n');
-        let currentCursor = 0; // "next" キーワード用のカーソル
+        let currentCursor = 0;
 
         lines.forEach((line, index) => {
-            // コメント除去と空白トリム
-            const l = line.split('#')[0].trim();
-            if (!l) return;
+            const l = line.trim();
+            if (!l || l.startsWith('#')) return;
 
-            // main.s の書式: TrackID, Start, PitchOffset, Vol, Pan
+            if (l.startsWith('@')) {
+                result += l.substring(1).trim() + "\n";
+                return; 
+            }
+
             const parts = l.split(',').map(s => s.trim());
             if (parts.length < 2) return;
 
