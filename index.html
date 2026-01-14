@@ -2,108 +2,109 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>LLMimi - AI Music Assembly Studio</title>	
-	<link rel="stylesheet" href="style.css">
-    <style>
-        .track-container { border: 1px solid #ccc; margin: 10px 0; padding: 10px; }
-        textarea { width: 100%; font-family: monospace; }
-        .controls { margin: 20px 0; }
-        .editor-layout { display: flex; gap: 20px; }
-        .main-sequence { flex: 1; }
-        .tracks-list { flex: 1; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMimi Studio - AI Music Assembly</title>
+    
+    <!-- スタイルシート -->
+    <link rel="stylesheet" href="./css/style.css">
+	
+	<!-- アイコン...ファビコン! -->
+	<link rel="icon" href="./assets/icon_logo.png">
+    
+    <!-- 外部ライブラリ: ZIP生成・解凍用 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
-    <h1>LLMimi Studio</h1>
-	<div class="controls">
-		<button id="playBtn">Compile & Play</button>
-		<button id="stopBtn">Stop</button>
-		<button id="addTrackBtn">+ Add Track</button>
-		
-		<span>Title: <input type="text" id="titleInput" value="Untitled" style="width: 120px;"></span>
-		<span>FPS: <input type="number" id="fpsInput" value="24" style="width: 40px;"></span>
-		<span>BPM: <input type="number" id="bpmInput" value="120" style="width: 50px;"></span>
-	</div>
+    <div id="noteMonitor" style="display:none;">IDLE</div>
 
-    <div class="editor-layout">
-        <div class="main-sequence">
-            <h3>main.s (Main Loop)</h3>
-            <p><small>TrackID, Start, PitchOffset, Volume, Pan</small></p>
-            <textarea id="mainSeq" rows="20" placeholder="# Example:
-00, 0, 0, 255, 128
-00, 48, 2, 255, 128"></textarea>
+    <!-- アプリケーションヘッダー -->
+    <header class="app-header">
+        <div class="logo-area">
+            <a href="#">
+                <img src="./assets/icon_logo.png" alt="" class="icon-logo">
+            </a>
+            <h1>LLMimi Studio</h1>
         </div>
-
-        <div class="tracks-list">
-            <h3>Tracks (.s containers)</h3>
-            <div id="tracksContainer">
-            </div>
-        </div>
-    </div>
-
-    <hr>
-    <h3>Output (.mimi)</h3>
-	<div class="output-area">
-        <textarea id="outputMimi" readonly></textarea>
-    </div>
-
-	<script src="https://cdn.jsdelivr.net/gh/AruihaYoru/mimi@main/mimi.min.js"></script>
-    <script src="compiler.js"></script>
-    <script src="main.js"></script>
-
-    <script>
-        const tracksContainer = document.getElementById('tracksContainer');
-        const addTrackBtn = document.getElementById('addTrackBtn');
-        const playBtn = document.getElementById('playBtn');
-        const stopBtn = document.getElementById('stopBtn');
         
-        let trackCount = 0;
+        <div class="external-links">
+            <a href="https://github.com/AruihaYoru/mimi/" target="_blank" title="GitHub Repository">
+                <img src="./assets/icon_github.png" alt="" class="icon-link">
+            </a>
+            <a href="./README.md" target="_blank" title="Documentation">
+                <img src="./assets/icon_docs.png" alt="" class="icon-link">
+            </a>
+        </div>
+    </header>
 
-        function addTrack(id = null) {
-            const trackId = id !== null ? id : trackCount.toString().padStart(2, '0');
-            const div = document.createElement('div');
-            div.className = 'track-container';
-            div.innerHTML = `
-                <strong>Track ${trackId}.s</strong>
-                <textarea class="track-data" data-id="${trackId}" rows="8" placeholder="Type, Pitch, Length, Start, Vol, Pan"></textarea>
-                <button onclick="this.parentElement.remove()">Remove</button>
-            `;
-            tracksContainer.appendChild(div);
-            trackCount++;
-        }
+    <!-- メインコントロールバー -->
+    <div class="controls">
+        <div class="btn-group">
+            <button id="playBtn" class="primary" title="Compile and Play">
+                <img src="./assets/icon_play.png" alt="" class="btn-icon"> Compile & Play
+            </button>
+            <button id="stopBtn" class="danger" title="Stop Audio">
+                <img src="./assets/icon_stop.png" alt="" class="btn-icon"> Stop
+            </button>
+            <button id="addTrackBtn" title="Add new Track container">
+                <img src="./assets/icon_add.png" alt="" class="btn-icon"> Add Track
+            </button>
+        </div>
 
-        addTrack('00');
+        <div class="divider"></div>
 
-        addTrackBtn.onclick = () => addTrack();
+        <div class="btn-group">
+            <button id="saveBtn" title="Save as .mina (Project ZIP)">
+                <img src="./assets/icon_save.png" alt="" class="btn-icon"> Save .mina
+            </button>
+            <button id="loadBtn" title="Load .mina Project">
+                <img src="./assets/icon_load.png" alt="" class="btn-icon"> Load
+            </button>
+            <input type="file" id="fileInput" style="display:none" accept=".mina">
+        </div>
 
-        const player = new MimiPlayer();
-        const compiler = new MimaCompiler();
+        <div class="divider"></div>
 
-        playBtn.onclick = async () => {
-            const fps = parseInt(document.getElementById('fpsInput').value);
-            const mainS = document.getElementById('mainSeq').value;
-            
-            const tracks = {};
-            document.querySelectorAll('.track-data').forEach(ta => {
-                tracks[ta.dataset.id] = ta.value;
-            });
+        <div class="params-group">
+            <label>Title: <input type="text" id="titleInput" value="Untitled Song" placeholder="Song Title"></label>
+            <label>FPS: <input type="number" id="fpsInput" value="24"></label>
+            <label>BPM: <input type="number" id="bpmInput" value="120"></label>
+        </div>
+    </div>
 
-            try {
-                const compiledMimi = compiler.compile(mainS, tracks, fps);
-                document.getElementById('outputMimi').value = compiledMimi;
+    <!-- エディターメインエリア -->
+    <main class="editor-layout">
+        <!-- 左側：メインシーケンス -->
+        <section class="main-sequence">
+            <div class="section-header">
+                <h3><img src="./assets/icon_main.png" alt="" class="icon-s"> main.s (Main Loop)</h3>
+            </div>
+            <textarea id="mainSeq" spellcheck="false" placeholder="# TrackID, StartFrame, PitchOffset, Vol, Pan"></textarea>
+        </section>
 
-                player.fps = fps;
-                player.load(compiledMimi);
-                player.play();
-            } catch (e) {
-                alert("Compile Error: " + e.message);
-                console.error(e);
-            }
-        };
+        <!-- 右側：トラックリスト -->
+        <section class="tracks-list">
+            <div class="section-header">
+                <h3><img src="./assets/icon_list.png" alt="" class="icon-s"> Tracks (.s containers)</h3>
+            </div>
+            <div id="tracksContainer">
+			
+            </div>
+        </section>
+    </main>
 
-        stopBtn.onclick = () => player.stop();
+    <!-- 下部：コンパイル済み出力エリア -->
+    <footer class="output-area">
+        <div class="section-header">
+            <h3><img src="./assets/icon_output.png" alt="" class="icon-s"> Output (.mimi)</h3>
+        </div>
+        <textarea id="outputMimi" readonly placeholder="The compiled hex data will be displayed here..."></textarea>
+    </footer>
 
-    </script>
+    <!-- 再生エンジン・コンパイラ・メインロジック -->
+    <script src="https://cdn.jsdelivr.net/gh/AruihaYoru/mimi@main/mimi.min.js"></script>
+    <script src="./js/compiler.js"></script>
+    <script src="./js/main.js"></script>
+
 </body>
 </html>
