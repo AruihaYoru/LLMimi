@@ -48,7 +48,7 @@ class MimaCompiler {
         const framesPerBeat = Math.round((60 / bpm) * fps);
         const framesPerBar = framesPerBeat * 4;
 
-        let result = `# Mimi Music Format v1.0\n`;
+        let result = `# Mimi Music Format v2.0\n`;
         result += `# Title: ${title}\n`;
         result += `# Config: ${bpm}BPM, ${fps}FPS (1beat=${framesPerBeat}f)\n`;
         result += `# Format: Type, Pitch, Length, Start, Volume, Pan\n\n`;
