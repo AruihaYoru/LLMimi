@@ -24,7 +24,7 @@
             <a href="#">
                 <img src="./assets/icon_logo.png" alt="" class="icon-logo">
             </a>
-            <h1>LLMimi Studio（一時的にV2.0しか使用できなくなってます！！すいません！！）</h1>
+            <h1>LLMimi Studio</h1>
         </div>
         
         <div class="external-links">
@@ -69,6 +69,18 @@
             <label>Title: <input type="text" id="titleInput" value="Untitled Song" placeholder="Song Title"></label>
             <label>FPS: <input type="number" id="fpsInput" value="24"></label>
             <label>BPM: <input type="number" id="bpmInput" value="120"></label>
+			
+			<div class="version-selector">
+				<label>
+					<!-- name属性を揃えることで、どちらか一方しか選択できなくなる -->
+					<input type="radio" name="mimi-version" value="1.0" checked>
+					<span>v1.0</span>
+				</label>
+				<label>
+					<input type="radio" name="mimi-version" value="2.0">
+					<span>v2.0</span>
+				</label>
+			</div>
         </div>
     </div>
 
@@ -102,6 +114,10 @@
     </footer>
 
     <!-- 再生エンジン・コンパイラ・メインロジック -->
+	
+    <script src="https://cdn.jsdelivr.net/gh/AruihaYoru/mimi@main/mimi.Hex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AruihaYoru/mimi@main/mimi.V1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AruihaYoru/mimi@main/mimi.V2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AruihaYoru/mimi@main/mimi.min.js"></script>
     <script src="./js/compiler.js"></script>
     <script src="./js/main.js"></script>
